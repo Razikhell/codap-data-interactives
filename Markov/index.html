@@ -32,6 +32,7 @@
         <script type="text/javascript">
             /*This global is here to make it obvious how things get going*/
       var MarkovGame = {
+            diagnosticState: "loading",
             logAction: function(formatStr) {
               if (!this.model.codapAvailable) {
                 return;
@@ -49,10 +50,12 @@
               this.view.initialize();
               if (window.parent === window) {
                 this.model.initializeStandalone();
+                this.diagnosticState = "running standalone";
                 return;
               }
 
               try {
+                this.diagnosticState = "initializing legacy CODAP bootstrap";
                 this.legacyPhone = new iframePhone.IframePhoneRpcEndpoint(function(iCmd, callback) {
                   var operation = iCmd && iCmd.operation;
                   if (operation === 'saveState') {
@@ -73,6 +76,7 @@
                     }
                   }, resolve);
                 });
+                this.diagnosticState = "initializing modern CODAP API";
                 await codapInterface.init({
                   name: "Markov",
                   title: "Markov",
@@ -80,12 +84,24 @@
                   dimensions: { width: 534, height: 303 }
                 });
                 await this.model.initialize();
+                this.diagnosticState = "connected to CODAP";
               } catch (error) {
+                this.diagnosticState = "failed: " + error;
                 console.error("Markov: unable to initialize CODAP data collection:", error);
                 window.alert("Markov could not connect to CODAP, so turn data will not be recorded. Reload the CODAP document and try again.");
               }
             }
       }
+
+      window.addEventListener("message", function(event) {
+        if (event.source === window.parent && event.data && event.data.type === "markov-diagnostic") {
+          event.source.postMessage({
+            type: "markov-diagnostic",
+            state: MarkovGame.diagnosticState,
+            codapAvailable: MarkovGame.model && MarkovGame.model.codapAvailable
+          }, event.origin);
+        }
+      });
 
     </script>
     </head>
