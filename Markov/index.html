@@ -53,6 +53,26 @@
               }
 
               try {
+                this.legacyPhone = new iframePhone.IframePhoneRpcEndpoint(function(iCmd, callback) {
+                  var operation = iCmd && iCmd.operation;
+                  if (operation === 'saveState') {
+                    callback(MarkovGame.model.saveGameState());
+                  } else if (operation === 'restoreState') {
+                    callback(MarkovGame.model.restoreGameState(iCmd.args && iCmd.args.state));
+                  } else {
+                    callback({ success: false });
+                  }
+                }, "codap-game", window.parent);
+                await new Promise(function(resolve) {
+                  MarkovGame.legacyPhone.call({
+                    action: 'initGame',
+                    args: {
+                      name: "Markov",
+                      version: "3.0",
+                      dimensions: { width: 534, height: 303 }
+                    }
+                  }, resolve);
+                });
                 await codapInterface.init({
                   name: "Markov",
                   title: "Markov",
