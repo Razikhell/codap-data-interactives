@@ -27,13 +27,7 @@ function StrategyEditor( iStrategy, iCallback)
     this_.paper.remove();
     this_.paper = null;
     this_.callback.call();
-    var logAction = function(){
-        MarkovGame.model.codapPhone.call({
-            action:'logAction',
-            args: {formatStr: "backToGame:" }
-        });
-    }.bind(this);
-      logAction();
+    MarkovGame.logAction("backToGame:");
   }
 
   function clearStrategy() {
@@ -52,13 +46,7 @@ function StrategyEditor( iStrategy, iCallback)
         iTile.weights.push( iTile.weights[0].clone().transform('...t' + ((1 + iTile.weights.length * 8)) + ' 0'));
       }
     });
-      var logAction = function(){
-          MarkovGame.model.codapPhone.call({
-              action:'logAction',
-              args: {formatStr: "clearStrategy:" }
-          });
-      }.bind(this);
-      logAction();
+    MarkovGame.logAction("clearStrategy:");
     /*MarkovGame.model.dgApi.doCommand("logAction",
                                           {
                                             formatStr: "clearStrategy:"
@@ -171,13 +159,7 @@ StrategyEditor.prototype.setupTiles = function() {
           tTile.moveBorder.attr({ x: tTiny.tile.attr('x'), y: tTiny.tile.attr('y')});
           this_.hint.text( textForHint());
           drawMessage();
-          var logAction = function(){
-                MarkovGame.model.codapPhone.call({
-                    action:'logAction',
-                    args: {formatStr: "setTile: " + JSON.stringify( { prev2: tTile.prev2, to: tMove }) }
-                });
-          }.bind(this);
-            logAction();
+          MarkovGame.logAction("setTile: " + JSON.stringify({ prev2: tTile.prev2, to: tMove }));
           /*MarkovGame.model.dgApi.doCommand("logAction",
                                  {
                                    formatStr: "setTile: " +
@@ -304,13 +286,8 @@ StrategyEditor.prototype.setupTiles = function() {
           this_.draggedWeight.animate({ transform: 'T' + (tX + tWeightNum * 8) + ',' + tY}, 200, '<>');
           this_.dragOverTile.weightsCover.toFront();
           this_.dragOverTile.numWeights.attr('text', this_.dragOverTile.strat.weight);
-          var logAction = function(){
-                MarkovGame.model.codapPhone.call({
-                    action:'logAction',
-                    args: {formatStr: "dragWeight: " + JSON.stringify( { from: tTile.prev2, to: this_.dragOverTile.prev2 }) }
-                });
-          }.bind(this);
-            logAction();
+          MarkovGame.logAction("dragWeight: " +
+            JSON.stringify({ from: tTile.prev2, to: this_.dragOverTile.prev2 }));
           /*MarkovGame.model.dgApi.doCommand("logAction",
                                  {
                                    formatStr: "dragWeight: " +

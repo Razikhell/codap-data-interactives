@@ -82,14 +82,8 @@ Slider.prototype.setupDragging = function()
   function thumbDragStop( iEvent) {
     tCX = null;
     // Log speed as an integer 0 to 10 with 0 being slow and 10 being fast
-      var logAction = function(){
-          MarkovGame.model.codapPhone.call({
-              action:'logAction',
-              args: {formatStr: "setSpeed: " +
-                  JSON.stringify( { speed: 10 - Math.round(this_.model.animTime / 100)}) }
-          });
-      }.bind(this);
-      logAction();
+    MarkovGame.logAction("setSpeed: " +
+      JSON.stringify({ speed: 10 - Math.round(this_.model.animTime / 100) }));
     /*MarkovGame.model.dgApi.doCommand("logAction",
                            {
                              formatStr: "setSpeed: " +
@@ -104,4 +98,3 @@ Slider.prototype.setupDragging = function()
   this.thumb.drag( thumbDragMove, thumbDragStart, thumbDragStop);
   this.rect.click( clickRect);
 };
-
