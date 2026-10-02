@@ -124,8 +124,9 @@ MarkovModel.prototype.registerGraphDefaults = function() {
     window.setTimeout(function() {
       codapInterface.sendRequest({
         action: 'update',
-        resource: 'component[' + values.id + ']',
+        resource: 'component[' + values.id + '].dataConfiguration',
         values: {
+          collectionName: 'Turns',
           xAttributeName: 'previous_2_markov_moves',
           yAttributeName: 'markovs_move'
         }
