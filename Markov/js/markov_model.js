@@ -106,10 +106,32 @@ MarkovModel.prototype.initialize = async function()
   if (savedState && Object.keys(savedState).length) {
     this.restoreGameState(savedState);
   }
+
+  this.registerGraphDefaults();
 };
 
 MarkovModel.prototype.initializeStandalone = function() {
   this.codapAvailable = false;
+};
+
+MarkovModel.prototype.registerGraphDefaults = function() {
+  codapInterface.on('notify', 'component', function(message) {
+    var values = message.values;
+    if (values.operation !== 'create' || values.type !== 'graph') {
+      return;
+    }
+
+    window.setTimeout(function() {
+      codapInterface.sendRequest({
+        action: 'update',
+        resource: 'component[' + values.id + ']',
+        values: {
+          xAttributeName: 'previous_2_markov_moves',
+          yAttributeName: 'markovs_move'
+        }
+      });
+    }, 0);
+  });
 };
 
 /**
