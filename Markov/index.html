@@ -81,8 +81,8 @@
                 });
                 await this.model.initialize();
               } catch (error) {
-                console.info("Markov: running without a CODAP connection.");
-                this.model.initializeStandalone();
+                console.error("Markov: unable to initialize CODAP data collection:", error);
+                window.alert("Markov could not connect to CODAP, so turn data will not be recorded. Reload the CODAP document and try again.");
               }
             }
       }

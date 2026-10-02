@@ -9,6 +9,8 @@
  * @preserve (c) 2012 KCP Technologies, Inc.
  */
 
+var MarkovDataContextName = "Markov Data";
+
 function MarkovModel()
 {
   this.eventDispatcher = new EventDispatcher();
@@ -69,37 +71,44 @@ MarkovModel.prototype.initialize = async function()
     resource: 'dataContextList'
   });
   if (result.success && !result.values.some(function(dataContext) {
-    return [dataContext.name, dataContext.title].includes("Markov");
+    return [dataContext.name, dataContext.title].includes(MarkovDataContextName);
   })) {
-    await codapHelper.createDataset({
-      name: "Markov",
-      collections: [
-        {
-          name: "Games",
-          attrs: [
-            {"name": "game", "type": "numeric", "precision": 0, "description": "game number"},
-            {"name": "turns", "type": "numeric", "precision": 0, "description": "number of turns in the game"},
-            {"name": "winner", "type": "categorical", "description": "who won? You or Markov?"},
-            {"name": "level", "type": "categorical", "description": "what level of the game was played"}
-          ],
-          defaults: { xAttr: "game", yAttr: "turns" }
-        },
-        {
-          name: "Turns",
-          parent: "Games",
-          attrs: [
-            {"name": "turn", "type": "numeric", "precision": 0, "description": "the turn number in the game"},
-            {"name": "markovs_move", "type": "categorical", "description": "the move Markov made this turn"},
-            {"name": "your_move", "type": "categorical", "description": "the move you made this turn"},
-            {"name": "result", "type": "categorical", "description": "did you win or lose this turn?"},
-            {"name": "up_down", "type": "numeric", "precision": 0, "description": "the number of steps Madeline moved"},
-            {"name": "previous_2_markov_moves", "type": "categorical", "description": "the two moves Markov made prior to this one"}
-          ],
-          defaults: { xAttr: "previous_2_markov_moves", yAttr: "markovs_move" }
-        }
-      ],
-      type: 'DG.GameContext'
+    var createResult = await codapInterface.sendRequest({
+      action: 'create',
+      resource: 'dataContext',
+      values: {
+        name: MarkovDataContextName,
+        collections: [
+          {
+            name: "Games",
+            attrs: [
+              {"name": "game", "type": "numeric", "precision": 0, "description": "game number"},
+              {"name": "turns", "type": "numeric", "precision": 0, "description": "number of turns in the game"},
+              {"name": "winner", "type": "categorical", "description": "who won? You or Markov?"},
+              {"name": "level", "type": "categorical", "description": "what level of the game was played"}
+            ],
+            defaults: { xAttr: "game", yAttr: "turns" }
+          },
+          {
+            name: "Turns",
+            parent: "Games",
+            attrs: [
+              {"name": "turn", "type": "numeric", "precision": 0, "description": "the turn number in the game"},
+              {"name": "markovs_move", "type": "categorical", "description": "the move Markov made this turn"},
+              {"name": "your_move", "type": "categorical", "description": "the move you made this turn"},
+              {"name": "result", "type": "categorical", "description": "did you win or lose this turn?"},
+              {"name": "up_down", "type": "numeric", "precision": 0, "description": "the number of steps Madeline moved"},
+              {"name": "previous_2_markov_moves", "type": "categorical", "description": "the two moves Markov made prior to this one"}
+            ],
+            defaults: { xAttr: "previous_2_markov_moves", yAttr: "markovs_move" }
+          }
+        ],
+        type: 'DG.GameContext'
+      }
     });
+    if (!createResult.success) {
+      throw new Error("CODAP could not create the Markov Data context.");
+    }
   }
 
   var savedState = codapInterface.getInteractiveState();
@@ -151,7 +160,7 @@ MarkovModel.prototype.openNewGameCase = async function()
 
     var result = await codapInterface.sendRequest({
       action: 'create',
-      resource: "dataContext[Markov].collection[Games].case",
+      resource: "dataContext[" + MarkovDataContextName + "].collection[Games].case",
       values: [{
         values: {
           game: this.gameNumber,
@@ -188,7 +197,7 @@ MarkovModel.prototype.addTurnCase = async function()
 
   await codapInterface.sendRequest({
     action: "create",
-    resource: "dataContext[Markov].collection[Turns].case",
+    resource: "dataContext[" + MarkovDataContextName + "].collection[Turns].case",
     values: [{
       parent: this.openGameCase,
       values: {
@@ -215,7 +224,7 @@ MarkovModel.prototype.addGameCase = async function()
   if (this.codapAvailable && this.openGameCase) {
     var result = await codapInterface.sendRequest({
       action: 'update',
-      resource: "dataContext[Markov].collection[Games].caseByID[" + this.openGameCase + "]",
+      resource: "dataContext[" + MarkovDataContextName + "].collection[Games].caseByID[" + this.openGameCase + "]",
       values: {
         values: {
           game: this.gameNumber,
